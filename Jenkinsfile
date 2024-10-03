@@ -1,6 +1,6 @@
 //DECLARATIVE PIPELINE
 pipeline {
-	agent { docker { image: 'maven:3.6.3'}}
+	agent { docker { image 'maven:3.6.3'}}
 	stages {
 		stage ('Build') {
 			steps {
@@ -28,6 +28,9 @@ pipeline {
 		}
 		failure {
 			echo 'I will when build is failed'
+		}
+		changed {
+			echo 'I will when build is changed'
 		}
 	}
 }
