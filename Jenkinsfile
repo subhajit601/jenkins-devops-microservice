@@ -12,7 +12,7 @@ pipeline {
 		stage('Test Docker') {
             steps {
                 sh 'echo $DOCKER_HOST'
-                sh 'docker -H $DOCKER_HOST version'
+                sh 'docker version'
             }
         }
 		stage ('Build') {
