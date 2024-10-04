@@ -15,6 +15,7 @@ pipeline {
 		stage ('Build') {
 			steps {
 				sh 'mv --version'
+				sh 'echo $DOCKER_HOST'
 				sh 'docker -H tcp://localhost:2375 version'
 				//sh 'docker version'
 				echo "Build"
