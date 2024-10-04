@@ -7,7 +7,8 @@ pipeline {
 		dockerHome = tool 'myDocker'
 		mavenHome = tool 'myMaven'
 		PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
-		DOCKER_HOST = "tcp://host.docker.internal:2375"
+		DOCKER_HOST = "tcp://localhost:2375"
+        DOCKER_TLS_VERIFY = ""
 
 	}
 	stages {
