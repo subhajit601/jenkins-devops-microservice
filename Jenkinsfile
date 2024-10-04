@@ -16,7 +16,7 @@ pipeline {
 			steps {
 				sh 'mv --version'
 				sh 'docker -H tcp://localhost:2375 version'
-				sh 'docker version'
+				//sh 'docker version'
 				echo "Build"
 				echo "PATH - $PATH"
 				echo "BUILD_NUMBER - $env.BUILD_NUMBER"
