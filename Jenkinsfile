@@ -7,9 +7,6 @@ pipeline {
 		dockerHome = tool 'myDocker'
 		mavenHome = tool 'myMaven'
 		PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
-		DOCKER_HOST = "npipe:////./pipe/docker_engine"
-        DOCKER_TLS_VERIFY = ""
-
 	}
 	stages {
 		stage('Test Docker') {
