@@ -7,16 +7,20 @@ pipeline {
 		dockerHome = tool 'myDocker'
 		mavenHome = tool 'myMaven'
 		PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
-		DOCKER_HOST = "tcp://127.0.0.1:2375"
+		DOCKER_HOST = "npipe:////./pipe/docker_engine"
         DOCKER_TLS_VERIFY = ""
 
 	}
 	stages {
+		stage('Test Docker') {
+            steps {
+                sh 'echo $DOCKER_HOST'
+                sh 'docker -H $DOCKER_HOST version'
+            }
+        }
 		stage ('Build') {
 			steps {
 				sh 'mv --version'
-				sh 'echo $DOCKER_HOST'
-				sh 'docker -H tcp://127.0.0.1:2375 version'
 				//sh 'docker version'
 				echo "Build"
 				echo "PATH - $PATH"
