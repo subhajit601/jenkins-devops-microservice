@@ -4,9 +4,9 @@ pipeline {
 	//agent { docker { image 'node:20.9'}}
 	agent any
 	environment {
-		dockerHome = tool 'myDocker'
-		mavenHome = tool 'myMaven'
-		PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
+		// dockerHome = tool 'myDocker'
+		// mavenHome = tool 'myMaven'
+		// PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
 	}
 	stages {
 		stage('Test Docker') {
