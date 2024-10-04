@@ -7,7 +7,7 @@ pipeline {
 		dockerHome = tool 'myDocker'
 		mavenHome = tool 'myMaven'
 		PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
-		DOCKER_HOST = "tcp://localhost:2375"
+		DOCKER_HOST = "tcp://127.0.0.1:2375"
         DOCKER_TLS_VERIFY = ""
 
 	}
@@ -16,7 +16,7 @@ pipeline {
 			steps {
 				sh 'mv --version'
 				sh 'echo $DOCKER_HOST'
-				sh 'docker -H tcp://localhost:2375 version'
+				sh 'docker -H tcp://127.0.0.1:2375 version'
 				//sh 'docker version'
 				echo "Build"
 				echo "PATH - $PATH"
