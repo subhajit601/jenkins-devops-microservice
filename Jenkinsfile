@@ -1,75 +1,73 @@
-//DECLARATIVE PIPELINE
 pipeline {
-	// agent { docker { image 'maven:3.6.3'}}
-	//agent { docker { image 'node:20.9'}}
-	agent any
-	environment {
-		dockerHome = tool 'myDocker'
-		mavenHome = tool 'myMaven'
-		 // Set Docker Host to communicate with the Docker daemon without TLS
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'  // Communicate with Docker daemon
-        DOCKER_TLS_VERIFY = '0'  // Disable TLS
-	}
-	stages {
-		stage('Setup Docker Context') {
+    agent any
+
+    environment {
+        // Docker and Maven paths
+        dockerHome = tool 'myDocker'
+        mavenHome = tool 'myMaven'
+        PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
+
+        // Docker connection settings (using HTTP)
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'
+        DOCKER_TLS_VERIFY = '0'
+    }
+
+    stages {
+        stage ('Setup Docker Context') {
             steps {
-                // Create a new Docker context that uses HTTP without TLS
+                // Check if the Docker context already exists, otherwise create it
                 sh '''
-                    echo "Setting up Docker context for HTTP connection..."
-                    docker context create host-docker --docker "host=tcp://host.docker.internal:2375"
+                    echo "Checking if Docker context 'host-docker' exists..."
+                    if docker context inspect host-docker > /dev/null 2>&1; then
+                        echo "Docker context 'host-docker' already exists, switching to it..."
+                    else
+                        echo "Creating Docker context 'host-docker'..."
+                        docker context create host-docker --docker "host=tcp://host.docker.internal:2375"
+                    fi
                     docker context use host-docker
                 '''
             }
         }
-		stage('Test Docker') {
+
+        stage ('Build') {
             steps {
-                //sh 'echo $DOCKER_HOST'
-                // Use the new context to check Docker version
-                sh '''
-                    echo "Checking Docker Version..."
-                    docker --context host-docker version
-                '''
+                sh 'mv --version'  // Check mv command
+                sh 'docker --context host-docker version'  // Use Docker with the custom context
+                echo "Build Stage"
+                echo "PATH: $PATH"
+                echo "BUILD_NUMBER: $env.BUILD_NUMBER"
+                echo "BUILD_ID: $env.BUILD_ID"
+                echo "JOB_NAME: $env.JOB_NAME"
+                echo "BUILD_TAG: $env.BUILD_TAG"
+                echo "BUILD_URL: $env.BUILD_URL"
             }
         }
-		stage ('Build') {
-			steps {
-				sh 'mv --version'
-				sh '''
-                    echo "Checking Docker Version..."
-                    docker --context host-docker version
-                '''
-				echo "Build"
-				echo "PATH - $PATH"
-				echo "BUILD_NUMBER - $env.BUILD_NUMBER"
-				echo "BUILD_ID - $env.BUILD_ID"
-				echo "JOB_NAME - $env.JOB_NAME"
-				echo "BUILD_TAG - $env.BUILD_TAG"
-				echo "BUILD_URL - $env.BUILD_URL"
-			}
-		}
-		stage ('Test') {
-			steps {
-				echo "Test"
-			}
-		}
-		stage ('Integration Test') {
-			steps {
-				echo "Integration Test"
-			}
-		}
-	} 
-	post {
-		always {
-			echo 'I will always run...'
-		}
-		success {
-			echo 'I will when build is success'
-		}
-		failure {
-			echo 'I will when build is failed'
-		}
-		changed {
-			echo 'I will when build is changed'
-		}
-	}
+
+        stage ('Test') {
+            steps {
+                echo "Test Stage"
+            }
+        }
+
+        stage ('Integration Test') {
+            steps {
+                echo "Integration Test Stage"
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'I will always run...'
+        }
+        success {
+            echo 'I will run when build is successful'
+        }
+        failure {
+            echo 'I will run when the build fails'
+        }
+        changed {
+            echo 'I will run when the build result changes'
+        }
+    }
 }
