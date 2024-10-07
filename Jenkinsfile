@@ -1,56 +1,29 @@
-//DECLARATIVE PIPELINE
 pipeline {
-	// agent { docker { image 'maven:3.6.3'}}
-	//agent { docker { image 'node:20.9'}}
-	agent any
-	environment {
-		// dockerHome = tool 'myDocker'
-		mavenHome = tool 'myMaven'
-		// PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
-	}
-	stages {
-		stage('Test Docker') {
+    agent any
+
+    // Set the Docker Host Environment Variable
+    environment {
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'  // This tells Jenkins to communicate with Docker Desktop on Windows
+    }
+
+    stages {
+        stage('Verify Docker Connection') {
             steps {
-                //sh 'echo $DOCKER_HOST'
+                // Perform a CURL command to verify connectivity to Docker daemon
+                sh '''
+                    echo "Checking Docker Daemon connectivity..."
+                    curl http://host.docker.internal:2375/version
+                '''
+            }
+        }
+
+        stage('Check Docker Version') {
+            steps {
+                // Check Docker version from Jenkins (should now connect to Docker Desktop on Windows)
                 sh 'docker version'
             }
         }
-		stage ('Build') {
-			steps {
-				sh 'mv --version'
-				//sh 'docker version'
-				echo "Build"
-				echo "PATH - $PATH"
-				echo "BUILD_NUMBER - $env.BUILD_NUMBER"
-				echo "BUILD_ID - $env.BUILD_ID"
-				echo "JOB_NAME - $env.JOB_NAME"
-				echo "BUILD_TAG - $env.BUILD_TAG"
-				echo "BUILD_URL - $env.BUILD_URL"
-			}
-		}
-		stage ('Test') {
-			steps {
-				echo "Test"
-			}
-		}
-		stage ('Integration Test') {
-			steps {
-				echo "Integration Test"
-			}
-		}
-	} 
-	post {
-		always {
-			echo 'I will always run...'
-		}
-		success {
-			echo 'I will when build is success'
-		}
-		failure {
-			echo 'I will when build is failed'
-		}
-		changed {
-			echo 'I will when build is changed'
-		}
-	}
+
+        // Add more stages here as needed for your build
+    }
 }
