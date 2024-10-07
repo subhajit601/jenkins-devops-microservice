@@ -2,14 +2,20 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'  // Communicate with Docker daemon
-        DOCKER_TLS_VERIFY = '0'  // Disable TLS
+        // Docker and Maven paths
+        dockerHome = tool 'myDocker'
+        mavenHome = tool 'myMaven'
+        PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
+
+        // Docker connection settings (using HTTP)
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'
+        DOCKER_TLS_VERIFY = '0'
     }
 
     stages {
-        stage('Setup Docker Context') {
+        stage ('Setup Docker Context') {
             steps {
-                // Create a new Docker context that uses HTTP without TLS
+                // Set up Docker context for HTTP communication without TLS
                 sh '''
                     echo "Setting up Docker context for HTTP connection..."
                     docker context create host-docker --docker "host=tcp://host.docker.internal:2375"
@@ -18,24 +24,45 @@ pipeline {
             }
         }
 
-        stage('Verify Docker Connection') {
+        stage ('Build') {
             steps {
-                // Test the Docker connection using the created context
-                sh '''
-                    echo "Checking Docker Daemon connectivity..."
-                    curl http://host.docker.internal:2375/version
-                '''
+                sh 'mv --version'  // Check if mv is installed and version
+                sh 'docker --context host-docker version'  // Check Docker version using custom context
+                echo "Build Stage"
+                echo "PATH: $PATH"
+                echo "BUILD_NUMBER: $env.BUILD_NUMBER"
+                echo "BUILD_ID: $env.BUILD_ID"
+                echo "JOB_NAME: $env.JOB_NAME"
+                echo "BUILD_TAG: $env.BUILD_TAG"
+                echo "BUILD_URL: $env.BUILD_URL"
             }
         }
 
-        stage('Check Docker Version') {
+        stage ('Test') {
             steps {
-                // Use the new context to check Docker version
-                sh '''
-                    echo "Checking Docker Version..."
-                    docker --context host-docker version
-                '''
+                echo "Test Stage"
             }
+        }
+
+        stage ('Integration Test') {
+            steps {
+                echo "Integration Test Stage"
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'I will always run...'
+        }
+        success {
+            echo 'I will run when build is successful'
+        }
+        failure {
+            echo 'I will run when the build fails'
+        }
+        changed {
+            echo 'I will run when the build result changes'
         }
     }
 }
