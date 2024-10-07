@@ -29,7 +29,7 @@ pipeline {
             }
         }
 
-        stage ('Build') {
+        stage ('Checkout') {
             steps {
                 sh 'mv --version'  // Check mv command
                 sh 'docker --context host-docker version'  // Use Docker with the custom context
@@ -43,15 +43,21 @@ pipeline {
             }
         }
 
+		stage ('Compile') {
+			steps {
+				sh "mvn clean compile"
+			}
+		}
+
         stage ('Test') {
             steps {
-                echo "Test Stage"
+                sh "mvn test"
             }
         }
 
         stage ('Integration Test') {
             steps {
-                echo "Integration Test Stage"
+                sh "mvn failsafe:integration-test failsafe:verify"
             }
         }
     }
