@@ -4,7 +4,7 @@ pipeline {
     // Set the Docker Host Environment Variable
     environment {
         DOCKER_HOST = 'tcp://host.docker.internal:2375'  // This tells Jenkins to communicate with Docker Desktop on Windows
-		DOCKER_TLS_VERIFY = '0'  // Disable TLS verification (force HTTP)
+	DOCKER_TLS_VERIFY = '0'  // Disable TLS verification (force HTTP)
     }
 
     stages {
