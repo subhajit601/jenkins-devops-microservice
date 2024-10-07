@@ -15,10 +15,15 @@ pipeline {
     stages {
         stage ('Setup Docker Context') {
             steps {
-                // Set up Docker context for HTTP communication without TLS
+                // Check if the Docker context already exists, otherwise create it
                 sh '''
-                    echo "Setting up Docker context for HTTP connection..."
-                    docker context create host-docker --docker "host=tcp://host.docker.internal:2375"
+                    echo "Checking if Docker context 'host-docker' exists..."
+                    if docker context inspect host-docker > /dev/null 2>&1; then
+                        echo "Docker context 'host-docker' already exists, switching to it..."
+                    else
+                        echo "Creating Docker context 'host-docker'..."
+                        docker context create host-docker --docker "host=tcp://host.docker.internal:2375"
+                    fi
                     docker context use host-docker
                 '''
             }
@@ -26,8 +31,8 @@ pipeline {
 
         stage ('Build') {
             steps {
-                sh 'mv --version'  // Check if mv is installed and version
-                sh 'docker --context host-docker version'  // Check Docker version using custom context
+                sh 'mv --version'  // Check mv command
+                sh 'docker --context host-docker version'  // Use Docker with the custom context
                 echo "Build Stage"
                 echo "PATH: $PATH"
                 echo "BUILD_NUMBER: $env.BUILD_NUMBER"
@@ -56,13 +61,4 @@ pipeline {
             echo 'I will always run...'
         }
         success {
-            echo 'I will run when build is successful'
-        }
-        failure {
-            echo 'I will run when the build fails'
-        }
-        changed {
-            echo 'I will run when the build result changes'
-        }
-    }
-}
+            echo 'I will run when bui
