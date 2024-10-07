@@ -2,16 +2,25 @@ pipeline {
     agent any
 
     environment {
-        // Set Docker Host to communicate with the Docker daemon without TLS
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'
-        DOCKER_TLS_VERIFY = '0'  // Disable TLS verification
-        DOCKER_API_VERSION = '1.41' // You may also want to set this for compatibility (optional)
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'  // Communicate with Docker daemon
+        DOCKER_TLS_VERIFY = '0'  // Disable TLS
     }
 
     stages {
+        stage('Setup Docker Context') {
+            steps {
+                // Create a new Docker context that uses HTTP without TLS
+                sh '''
+                    echo "Setting up Docker context for HTTP connection..."
+                    docker context create host-docker --docker "host=tcp://host.docker.internal:2375"
+                    docker context use host-docker
+                '''
+            }
+        }
+
         stage('Verify Docker Connection') {
             steps {
-                // Use curl to check Docker daemon connection
+                // Test the Docker connection using the created context
                 sh '''
                     echo "Checking Docker Daemon connectivity..."
                     curl http://host.docker.internal:2375/version
@@ -21,12 +30,10 @@ pipeline {
 
         stage('Check Docker Version') {
             steps {
-                // Add environment variable to force HTTP usage for Docker commands
+                // Use the new context to check Docker version
                 sh '''
                     echo "Checking Docker Version..."
-                    export DOCKER_HOST=tcp://host.docker.internal:2375
-                    export DOCKER_TLS_VERIFY=0
-                    docker --debug version
+                    docker --context host-docker version
                 '''
             }
         }
