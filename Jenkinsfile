@@ -61,4 +61,13 @@ pipeline {
             echo 'I will always run...'
         }
         success {
-            echo 'I will run when bui
+            echo 'I will run when build is successful'
+        }
+        failure {
+            echo 'I will run when the build fails'
+        }
+        changed {
+            echo 'I will run when the build result changes'
+        }
+    }
+}
