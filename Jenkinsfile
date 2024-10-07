@@ -1,16 +1,17 @@
 pipeline {
     agent any
 
-    // Set the Docker Host Environment Variable
     environment {
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'  // This tells Jenkins to communicate with Docker Desktop on Windows
-	DOCKER_TLS_VERIFY = '0'  // Disable TLS verification (force HTTP)
+        // Set Docker Host to communicate with the Docker daemon without TLS
+        DOCKER_HOST = 'tcp://host.docker.internal:2375'
+        DOCKER_TLS_VERIFY = '0'  // Disable TLS verification
+        DOCKER_API_VERSION = '1.41' // You may also want to set this for compatibility (optional)
     }
 
     stages {
         stage('Verify Docker Connection') {
             steps {
-                // Perform a CURL command to verify connectivity to Docker daemon
+                // Use curl to check Docker daemon connection
                 sh '''
                     echo "Checking Docker Daemon connectivity..."
                     curl http://host.docker.internal:2375/version
@@ -20,11 +21,14 @@ pipeline {
 
         stage('Check Docker Version') {
             steps {
-                // Check Docker version from Jenkins (should now connect to Docker Desktop on Windows)
-                sh 'docker version'
+                // Add environment variable to force HTTP usage for Docker commands
+                sh '''
+                    echo "Checking Docker Version..."
+                    export DOCKER_HOST=tcp://host.docker.internal:2375
+                    export DOCKER_TLS_VERIFY=0
+                    docker --debug version
+                '''
             }
         }
-
-        // Add more stages here as needed for your build
     }
 }
